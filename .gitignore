@@ -10,3 +10,4 @@ doc
 examples/*/output
 pkg
 tags
+.*.swp
