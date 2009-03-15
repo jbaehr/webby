@@ -2,8 +2,12 @@
 # If RedCloth is installed, then configure the textile filter
 if try_require('redcloth', 'RedCloth')
 
-  Webby::Filters.register :textile do |input|
-    RedCloth.new(input, %w(no_span_caps)).to_html
+  Webby::Filters.register :textile do |input, cursor|
+    if cursor.remaining_filters.include? "rtex"
+      RedCloth.new(input, %w(no_span_caps)).to_latex
+    else
+      RedCloth.new(input, %w(no_span_caps)).to_html
+    end
   end
 
 # Otherwise raise an error if the user tries to use textile
