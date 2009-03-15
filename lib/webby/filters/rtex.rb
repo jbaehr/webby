@@ -2,7 +2,13 @@
 if try_require('rtex')
 
   Webby::Filters.register :rtex do |input, cursor|
-    # TODO preprocess? set extension to pdf? layout expansion if layout?
+    # TODO preprocess?
+    if cursor.page.layout
+      cursor.renderer.instance_variable_set(:@content, input)
+      cursor.renderer._render_layout_for(cursor.page)
+      input = cursor.renderer.instance_variable_get(:@content)
+      cursor.page.layout = nil
+    end
     RTeX::Document.new(input).to_pdf(cursor.renderer.get_binding)
   end
 
