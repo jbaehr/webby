@@ -3,10 +3,19 @@
 if try_require('redcloth', 'RedCloth')
 
   Webby::Filters.register :textile do |input, cursor|
-    if cursor.remaining_filters.include? "rtex"
-      RedCloth.new(input, %w(no_span_caps)).to_latex
+    options = Array.new
+    # no_span_caps is the default, to stay backward compatible
+    options << :no_span_caps unless cursor.current_options[:span_caps]
+    options << :lite_mode if cursor.current_options[:lite_mode]
+    # if we will filter through rtex, use latex as default target
+    target = :latex if cursor.remaining_filters.include? "rtex"
+    # it's still possible to overwrite this setting by giving an explicit target
+    target = :latex if cursor.current_options[:latex]
+    target = :html if cursor.current_options[:html]
+    if target == :latex
+      RedCloth.new(input, options).to_latex
     else
-      RedCloth.new(input, %w(no_span_caps)).to_html
+      RedCloth.new(input, options).to_html
     end
   end
 
