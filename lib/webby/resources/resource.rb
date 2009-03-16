@@ -134,6 +134,69 @@ class Resource
     false
   end
 
+  # An array of filters by which this resource is transformed
+  # This method strips of the options which may be presend and returns a simple array of strings
+  def filter
+    Array(_meta_data['filter']).collect do |item|
+      case item
+      when String
+        item
+      when Hash
+        raise Webby::Error, "invalid filter options for #{item.inspect}" if item.length > 1
+        item.keys.first
+      else
+        raise Webby::Error, "invalid filter options for #{item.inspect}"
+      end
+    end
+  end
+
+  # Returns a hash with an option-hash for each filter.
+  # Options for filters may be given in the following forms
+  # filter:
+  #   - erb
+  #   - textile: no_span_caps
+  #   - foo: span_caps, no_bar
+  #   - rtex:
+  #       preprocess: true
+  #       preprocessor: latex
+  # The resulting filter options will look like this:
+  # {
+  #   "erb" => {},
+  #   "textile" => {:span_caps => false},
+  #   "foo" => {:span_caps => true, :bar => false},
+  #   "rtex" => {:preprocess => true, :preprocessor => "latex"}
+  # }
+  def filter_options
+    options = Hash.new
+    Array(_meta_data['filter']).each do |item|
+      case item
+      when String
+        options[item] = Hash.new
+      when Hash
+        raise Webby::Error, "invalid filter options for #{item.inspect}" if item.length > 1
+        opt = item.values.first
+        case opt
+        when Hash
+          options[item.keys.first] = opt.symbolize_keys.sanitize!
+        when String
+          h = Hash.new
+          opt.split(",").each do |s|
+            s.strip!
+            if s =~ /^no_(.*)/
+              h[$1.to_sym] = false
+            else
+              h[s.to_sym] = true
+            end
+          end
+          options[item.keys.first] = h
+        end
+      else
+        raise Webby::Error, "invalid filter options for #{item.inspect}"
+      end
+    end
+    options
+  end
+
   # The resource filename excluding path and extension. This will either be
   # the name of the file or the 'filename' attribute from the meta-data if
   # present.

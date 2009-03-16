@@ -2,10 +2,19 @@ module Webby
 module Filters
    
   class << self
+
+    # This represents a filter handler.
+    # +processor+ has to be a block performing the transformation.
+    # +options+ are a set of options for this transformation
+    Handler = Struct.new :processor, :options
     
     # Register a handler for a filter
-    def register( filter, &block )
-      _handlers[filter.to_s] = block
+    # +filter+ is the name of the filter
+    # +options+ is an optional hash of options for the filter. The following keys are recognised:
+    #   +need_layout+ says that the filter need the full page, layout already applied
+    #   +defaults+ a hash of default options for the filter. These options can be overwritten by the page's meta data
+    def register( filter, options = {}, &block )
+      _handlers[filter.to_s] = Handler.new(block, options)
     end
     
     # Process input through filters
@@ -23,7 +32,7 @@ module Filters
     def _handlers
       @handlers ||= {}
     end
-    
+
     # Instances of this class handle processing a set of filters
     # for a given renderer and page.
     # Note: The instance is passed as the second argument to filters
@@ -48,7 +57,7 @@ module Filters
           handler = Filters[filter]
           raise ::Webby::Error, "unknown filter: #{filter.inspect}" if handler.nil?
 
-          args = [result, self][0, handler.arity]
+          args = [result, self][0, handler.processor.arity]
           _handle(filter, handler, *args)
         end
       ensure
@@ -64,10 +73,24 @@ module Filters
       def current_filter
         filters[@processed]
       end
-      
+
+      # default options for the current handler merged with site options and options from the page meta data
+      def current_options
+        (Filters[current_filter].options[:defaults] or Hash.new).
+          merge(((::Webby.site.page_defaults["filter_options"] or Hash.new)[current_filter] or Hash.new)).
+          merge((@page.filter_options[current_filter] or Hash.new))
+      end
+
       # Process arguments through a single filter
       def _handle(filter, handler, *args)
-        result = handler.call(*args)
+        if handler.options[:need_layout] and @page.layout
+          # apply the layout already since the current filter need to operate on a complete page.
+          @renderer.instance_variable_set(:@content, args[0])
+          @renderer._render_layout_for(@page)
+          args[0] = @renderer.instance_variable_get(:@content)
+          @page.layout = nil # the layout is aleady applied, and we don't want it a second time
+        end
+        result = handler.processor.call(*args)
         @processed += 1
         result
       rescue StandardError => err
