@@ -32,7 +32,7 @@ module Webby
       :content_dir   => 'content',
       :layout_dir    => 'layouts',
       :template_dir  => 'templates',
-      :exclude       => %w(tmp$ bak$ ~$ CVS \.svn),
+      :exclude       => %w(tmp$ bak$ ~$ CVS \.svn \.swp$),
       :page_defaults => {
         'layout'     => 'default'
       },
