@@ -126,7 +126,7 @@ describe Webby::Filters::BasePath do
   it 'registers a "basepath" filter in the filters module' do
     handler = Webby::Filters._handlers['basepath']
     handler.should_not be_nil
-    handler.arity.should == 2
+    handler.processor.arity.should == 2
   end
 
   it 'leaves the input text unchanged if a base path is not configured' do
@@ -137,7 +137,7 @@ describe Webby::Filters::BasePath do
     input = @input % ['', '<img src="/foo/picture.jpg" />']
 
     handler = Webby::Filters._handlers['basepath']
-    output = handler.call(input, cursor)
+    output = handler.processor.call(input, cursor)
 
     output.should equal(input)
   end
@@ -151,7 +151,7 @@ describe Webby::Filters::BasePath do
     input = @input % ['', '<img src="/foo/picture.jpg" />']
 
     handler = Webby::Filters._handlers['basepath']
-    handler.call(input, cursor).should == <<-HTML
+    handler.processor.call(input, cursor).should == <<-HTML
 <html>
 <head>
 

@@ -12,8 +12,11 @@ describe 'Webby::Filters::Textile' do
   if try_require('redcloth')
 
     it 'processes textile markup into HTML' do
+      cursor = mock("Cursor")
+      cursor.stub!(:current_options).and_return({})
+      cursor.stub!(:remaining_filters).and_return([])
       input = "p(foo). this is a paragraph of text"
-      output = Webby::Filters._handlers['textile'].call(input)
+      output = Webby::Filters._handlers['textile'].processor.call(input, cursor)
 
       output.should == %q{<p class="foo">this is a paragraph of text</p>}
     end
@@ -22,7 +25,7 @@ describe 'Webby::Filters::Textile' do
 
     it 'raises an error when RedCloth is used but not installed' do
       input = "p(foo). this is a paragraph of text"
-      lambda {Webby::Filters._handlers['textile'].call(input)}.should raise_error(Webby::Error, "'RedCloth' must be installed to use the textile filter")
+      lambda {Webby::Filters._handlers['textile'].processor.call(input)}.should raise_error(Webby::Error, "'RedCloth' must be installed to use the textile filter")
     end
 
   end
