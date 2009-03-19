@@ -8,30 +8,45 @@ module Filters
 # program and outpu nicely formatted and correct HTML (or XHTML).
 #
 # Options can be passed to the _tidy_ program via the
-# <code>Webby.site</code> struct. Setting the +tidy_options+ to the string
-# of desired options will do the trick.
+# <code>Webby.site</code> struct. Setting the +filter_options['tidy]+ to a hash
+# with desired options will do the trick.
 #
 # From a project's Rakefile, include the following line (or one that's more
 # to your liking):
 #
-#    SITE.tidy_options = "-indent -wrap 80 -utf8"
+#    SITE.filter_options['tidy'] = {:indent => true, :wrap => 80, :utf8 => true}
 #
+# You can also give the options directly when setting the filter in the layout:
+#  filter:
+#    - tidy: no_wrap, utf8
 class Tidy
 
   # call-seq:
-  #    Tidy.new( html )
+  #    Tidy.new( html, options = {} )
   #
   # Create a new filter that will process the given _html_ through the tidy
-  # program.
+  # program. execute 'tidy -?' for a list of options
   #
-  def initialize( str )
+  def initialize( str, options = {} )
     @log = ::Logging::Logger[self]
     @str = str
+    @parameter = stringify options
 
     # create a temporary file for holding any error messages
     # from the tidy program
     @err = Tempfile.new('tidy_err')
     @err.close
+  end
+
+  # transforms a hash of options to a string of tidy parameters
+  def stringify(options)
+    s = String.new
+    options.each_pair do |key, value|
+      next unless value
+      s << " -#{key}"
+      s << " #{value}" unless value == true
+    end
+    s
   end
 
   # call-seq:
@@ -41,7 +56,7 @@ class Tidy
   # created and output Tidy formatted HTML or XHTML.
   #
   def process
-    cmd = "tidy %s -q -f #{@err.path}" % ::Webby.site.tidy_options
+    cmd = "tidy #{@parameter} -q -f #{@err.path}"
     out = IO.popen(cmd, 'r+') do |tidy|
       tidy.write @str
       tidy.close_write
@@ -59,8 +74,18 @@ end  # class Tidy
 
 # Render html into html/xhtml via the Tidy program
 if cmd_available? %w[tidy -v]
-  register :tidy do |input|
-    Filters::Tidy.new(input).process
+  handel_options = {
+      :need_layout => true,
+      :defaults => {:indent => true, :wrap => 80}
+      }
+  register :tidy, handel_options do |input, cursor|
+    if ::Webby.site.tidy_options
+      Webby.deprecated "tidy_options", "please use filter_options['tidy']"
+      opts = {::Webby.site.tidy_options => true}
+    else
+      opts = cursor.current_options
+    end
+    Filters::Tidy.new(input, opts).process
   end
 
 # Otherwise raise an error if the user tries to use tidy

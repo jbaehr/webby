@@ -33,6 +33,43 @@ module Filters
       @handlers ||= {}
     end
 
+    # Options for filters may be given in the following forms
+    # filter:
+    #   - erb
+    #   - textile: no_span_caps
+    #   - foo: span_caps, no_bar
+    #   - rtex:
+    #       preprocess: true
+    #       preprocessor: latex
+    # The resulting filter options will look like this:
+    # {
+    #   "erb" => {},
+    #   "textile" => {:span_caps => false},
+    #   "foo" => {:span_caps => true, :bar => false},
+    #   "rtex" => {:preprocess => true, :preprocessor => "latex"}
+    # }
+    # This function transforms the value of a filter option into an option hash
+    def parse_options(opt)
+      case opt
+      when Hash
+        # already a hash, yeepee!
+        opt.symbolize_keys.sanitize!
+      when String
+        h = Hash.new
+        opt.split(",").each do |s|
+          s.strip!
+          if s =~ /^no_(.*)/
+            h[$1.to_sym] = false
+          else
+            h[s.to_sym] = true
+          end
+        end
+        h
+      else
+        Hash.new
+      end
+    end
+
     # Instances of this class handle processing a set of filters
     # for a given renderer and page.
     # Note: The instance is passed as the second argument to filters
@@ -77,7 +114,7 @@ module Filters
       # default options for the current handler merged with site options and options from the page meta data
       def current_options
         (Filters[current_filter].options[:defaults] or Hash.new).
-          merge(((::Webby.site.page_defaults["filter_options"] or Hash.new)[current_filter] or Hash.new)).
+          merge(Filters::parse_options(::Webby.site.filter_options[current_filter])).
           merge((@page.filter_options[current_filter] or Hash.new))
       end
 

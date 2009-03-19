@@ -53,11 +53,14 @@ module Webby
       :rsync_args => %w(-av),
 
       # Global options for HAML and SASS
-      :haml_options => {},
-      :sass_options => {},
+      :haml_options => {}, # deprecated, use filter_options['haml']
+      :sass_options => {}, # deprecated, use filter_options['sass']
 
       # Options passed to the 'tidy' program when the tidy filter is used
-      :tidy_options => '-indent -wrap 80',
+      :tidy_options => nil, # deprecated, use filter_options['tidy']
+
+      # Global filter options
+      :filter_options => {}, # defaults are set by the filter registration
 
       # List of valid URIs (these automatically pass validation)
       :valid_uris => [],
