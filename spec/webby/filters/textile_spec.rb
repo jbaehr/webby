@@ -21,6 +21,26 @@ describe 'Webby::Filters::Textile' do
       output.should == %q{<p class="foo">this is a paragraph of text</p>}
     end
 
+    it 'processes textile markup into LaTeX when requested' do
+      cursor = mock("Cursor")
+      cursor.stub!(:current_options).and_return({:latex => true})
+      cursor.stub!(:remaining_filters).and_return([])
+      input = "this is *strong* text"
+      output = Webby::Filters._handlers['textile'].processor.call(input, cursor)
+
+      output.should == "this is \\textbf{strong} text\n\n"
+    end
+
+    it 'processes textile markup into LaTeX when rtex is in the remaining filters' do
+      cursor = mock("Cursor")
+      cursor.stub!(:current_options).and_return({})
+      cursor.stub!(:remaining_filters).and_return(['foo', 'rtex'])
+      input = "this is *strong* text"
+      output = Webby::Filters._handlers['textile'].processor.call(input, cursor)
+
+      output.should == "this is \\textbf{strong} text\n\n"
+    end
+
   else
 
     it 'raises an error when RedCloth is used but not installed' do
