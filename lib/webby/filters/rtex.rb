@@ -1,10 +1,6 @@
 # If RTeX is installed, then configure the rtex filter
 if try_require('rtex')
-  options = {
-      :need_layout => true,
-      :defaults => {:preprocess => true}
-      }
-  Webby::Filters.register :rtex, options do |input, cursor|
+  Webby::Filters.register :rtex, :need_layout => true do |input, cursor|
     b = cursor.renderer.get_binding
     RTeX::Document.new(input, cursor.current_options).to_pdf(b)
   end
