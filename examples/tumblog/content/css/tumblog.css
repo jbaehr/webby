@@ -1,9 +1,9 @@
 ---
 extension: css
-filter:    sass
 layout:    nil   # no layout
-sass_options:
-  :style: :expanded
+filter:
+  - sass:
+      style: :expanded
 ---
 !background  = #FFF
 !text        = #000
