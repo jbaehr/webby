@@ -17,6 +17,7 @@ h2. Features
 * support for "UltraViolet":http://ultraviolet.rubyforge.org/ and "CodeRay":http://coderay.rubychan.de/ syntax highlighting
 * embeddable DOT scripts for "Graphviz":http://www.graphviz.org/ graphs
 * "LaTeX":http://www.latex-project.org/ snippets for mathematical formulas
+* "RTeX":http://rtex.rubyforge.org/ for pdf generation, provide the same content as html and pdf
 * automatically clean up generated content using "Tidy":http://tidy.sourceforge.net/
 * quick and speedy - only builds pages that have changed
 * deploy anywhere - it's just HTML, no special server stuff required

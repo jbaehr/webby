@@ -235,6 +235,16 @@ h2(#filters). Filters
 
 Filters are used in Webby to transform the text of pages and layouts. The filters applied to a page are defined in the meta-data of the page. The filters are used to transform different parts of the page contents resulting in HTML syntax, images, highlighted code, etc. Filters apply equally to pages and to layouts  --  that is, pages and layouts are treated in the same manner by filters.
 
+Some filters provide additional options. These options normal have sane defaults so in most cases it's not necessary to change them. You can overwrite the default settings globally in the Sitefile or indifidually by appending the settings to the filter in the page attributes. Filter options are key-value-maps but there are some handy shortcuts to specify them. For simple yes/no flags you can give the option names in a comma separated list after the filter; negative options are prefixed by 'no_'. If the options need values, list them one per line after the filter. Indention makes it clear where they belong. See the following example:
+
+<pre>
+filter:
+  - textile: latex, span_caps
+  - rtex:
+      preprocess: true
+      preprocessor: /usr/bin/latex
+</pre>
+
 This section will look at the various filters provided by Webby, what those filters do, and how they should be used. Enjoy!
 
 h3(#erbfilter). ERB
@@ -281,7 +291,12 @@ Include "textile" in the filter list of the page or layout that contains Textile
 
 <div class="label">Options</div>
 <div class="desc">
-none
+Per default the textile filter produces html (except when rtex appears later in the filter chain, then the output is latex) and uses the option no_span_caps. For use with the rtex filter it can also produce latex. Change it like this:
+
+<pre style="margin-bottom:0">
+filter:
+  - textile: latex, span_caps
+</pre>
 </div>
 
 <div class="label">Require</div>
@@ -330,10 +345,17 @@ Include "haml" in the filter list of the page or layout that contains HAML  form
 <div class="label">Options</div>
 <div class="desc">
 
-Options are passed to the haml filter by setting the "haml_options" in the page meta-data  --  the hash of options defined under the "haml_options" attribute will be passed to the haml filter engine when it is run. Please refer to the HAML documentation for the list of available options.
+The hash with the filter options will be passed to the haml filter engine when it is run. Please refer to the HAML documentation for the list of available options.
 
-p(last). Options are passed to the sass filter by setting the "sass_options" in the page meta-data  --  the hash of options defined under the "sass_options" attribute will be passed to the sass filter engine when it is run. Please refer to the SASS documentation for the list of available options.
+p(last). The hash with the filter options will be passed to the sass filter engine when it is run. Please refer to the SASS documentation for the list of available options.
 
+Example:
+
+<pre style="margin-bottom:0">
+filter:
+  - sass:
+      style: :expanded
+</pre>
 </div>
 
 <div class="label">Require</div>
@@ -395,6 +417,8 @@ bq. When editing HTML it's easy to make mistakes. Wouldn't it be nice if there w
 
 The tidy program only works on HTML/XHTML text, and therefore, tidy should be one of the last (if not the last) filter applied to your content. It is recommended to only include the tidy filter in your layout(s).
 
+Tidy is a post processing filter, that works on the complete page, incl. layout. Processing this filter will automatically apply the layout if it's used in a normal page.
+
 <div class="label">Usage</div>
 <div class="desc">
 Include "tidy" as the last item in the filter list of your layout(s).
@@ -403,17 +427,79 @@ Include "tidy" as the last item in the filter list of your layout(s).
 <div class="label">Options</div>
 <div class="desc">
 
-Options can be passed to the tidy program by specifying them in the project _Sitefile_. These are the command line options that will be passed to the tidy program when it is run.
+Options can be passed to the tidy program by specifying them in the project _Sitefile_. These are transformed to the command line options that will be passed to the tidy program when it is run. The example below shows the default options which will result in the command line "-indent -wrap 80", see the @tidy@ manual for details.
 
 <pre style="margin-bottom:0">
-SITE.tidy_options = '-indent -wrap 80'
+SITE.filter_options['tidy'] = {:indent => true, :wrap => 80}
 </pre>
+
+Of corse it's also possible to i.e. override the word wrap directly via filter options for tidy:
+
+<pre style="margin-bottom:0">
+filter:
+  - tidy: no_wrap
+</pre>
+
 </div>
 
 <div class="label">Require</div>
 <div class="desc">
 The HTML Tidy application must be installed on your system, and the @tidy@ executable must be available on the path.
 </div>
+
+
+h3(#rtex). RTeX
+
+The "rtex":rtex.rubyforge.org/ filter combines an erb step and pdf generation using @pdflatex@. It's a post processing filter, that works on the complete page, incl. layout. Processing this filter will automatically apply the layout if it's used in a normal page.
+
+<div class="label">Usage</div>
+<div class="desc">
+Include "rtex" as the last item in the filter list of your layout(s). A previous erb step is not required. Example layout "pdfarticle.txt"
+
+<pre>
+<%= Webby::YAML_SEP %>
+extension: pdf
+filter:    rtex
+<%= Webby::YAML_SEP %>
+\documentclass[12pt]{article}
+\title{<%%= @page.title %>}
+\date{<%%= @page.created_at.strftime "%d.%m.%Y" %>}
+\begin{document}
+\maketitle
+<%%= @content %>
+\end{document}
+</pre>
+
+This can now be used to produce an pdf as well as html from a singe input page:
+
+<pre style="margin-bottom:0">
+<%= Webby::YAML_SEP %>
+title:      Some Article
+created_at: 2009-03-15 14:31:13.397515 +01:00
+filter:
+  - textile
+<%= Webby::YAML_SEP %>
+layout: pdfarticle
+filter:
+  - textile: latex
+<%= Webby::YAML_SEP %>
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc congue ipsum vestibulum libero. Aenean vitae justo. Nam eget tellus. Etiam convallis, est eu lobortis mattis, lectus tellus tempus felis, a ultricies erat ipsum at metus.
+
+h2. Litora Sociis
+...
+</pre>
+</div>
+
+<div class="label">Options</div>
+<div class="desc">
+The filter options hash is passed as is to the rtex engine. see it's manual for details. If using longtable, tableofcontents or any other stuff that requires several latex runs, use the "preprocess" option.
+</div>
+
+<div class="label">Require</div>
+<div class="desc">
+Additionally to the *rtex* gem, a LaTeX distribution has to be installed on your machine and @pdflatex@ has to be present in the path.
+</div>
+
 
 h2. Using Rake
 
