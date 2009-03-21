@@ -501,5 +501,26 @@ Additionally to the *rtex* gem, a LaTeX distribution has to be installed on your
 </div>
 
 
+h2(#extending). Extending Webby
+
+h3(#adding_filters). Adding Filters
+
+It's quite simple to add custom filters for use in Webby pages. All you have to do is to add it's ruby code in the @lib/@ directory of your webby project (you may have to create this dir first) and restart @webby@. The details are explained in two following examples.
+
+h4. Simple e-Mail Address Obfuscator
+
+First we want to create a little filter that protects e-mail addresses against evil spam bots. Just place this code snippet in a file called @lib/email_obfuscator_filter.rb@. The filename doesn't really matter but @bla.rb@ is non the less a bad choice ;-)
+
+<pre>
+Webby::Filters.register :email_obfuscator do |input|
+  # transform "user@example.com" into "example dot com: user"
+  input.gsub /([a-z0-9_.-]+)@([a-z0-9.-]+)\.([a-z]{2,4})/i do
+    "#{$2} dot #{$3}: #{$1}"
+  end
+end
+</pre>
+
+Webby::Filters.register takes the name of your filter as symbol and a block containing the actual filter code. When ever you put "email_obfuscator" some where in a page's filter chain, this code will be called. The content to filter is passed to the block via the variable "input". In this simple example we just perform a search 'n replace using regular expressions.
+
 h2. Using Rake
 
