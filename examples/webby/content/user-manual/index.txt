@@ -522,5 +522,44 @@ end
 
 Webby::Filters.register takes the name of your filter as symbol and a block containing the actual filter code. When ever you put "email_obfuscator" some where in a page's filter chain, this code will be called. The content to filter is passed to the block via the variable "input". In this simple example we just perform a search 'n replace using regular expressions.
 
+h4. Adding Options: htmldoc
+
+Now let's move to something more complex. The next example shows how to use filter options and advanced process instructions. An imaginable "htmldoc":http://htmldoc.rubyforge.org/ filter may provide some options on the one hand and on the other it needs to operate on whole pages, incl. layout. Normally if a filter needs to operate on the complete page, it should be placed in the layout. However, sometimes one only want to make a single page available as pdf and it's always ugly to duplicate the same layout only to use a different filter chain.
+
+The long and short of it is that Webby::Filters.register takes a second, optional, parameter for all these options. It's a hash where you can give default options and process instructions for the filter. There is also a second argument for the filter block, the "cursor":/rdoc/classes/Webby/Filters/Cursor.html which gives you to the current page object, filter options, the renderer, etc.
+
+<pre>
+require "htmldoc"
+handel_options = {
+    # this forces the renderer to apply the layout *before* the input is passed to the filter
+    :need_layout => true,
+    # these are the default options for the filter. they can be overridden by the Sitefile
+    # and the individual filter options.
+    :defaults => {:bodycolor => :white, :links => true}
+    }
+Webby::Filters.register :htmldoc, handel_options do |input, cursor|
+  # cursor.current_options method takes the filter's default options, merges
+  # the site options, and merges the current page's filter options.
+  opts = cursor.current_options
+  PDF::HTMLDoc.create do |p|
+    opts.each_pair do |key, value|
+      p.set_option key, value
+    end
+    p << input
+  end
+end
+</pre>
+
+Now you can try to add a second yaml block to this manual and you get a second output "index.pdf". Note that the no_toc option gets automatically transformed to {:toc => false, :landscape => true} and merged with the default options given by the filter. The nice thing is that we don't need a new layout for this filter. It's pulled in directly before applying the htmldoc filter.
+
+<pre>
+extension: pdf
+filter:
+  - erb
+  - textile
+  - outline
+  - htmldoc: no_toc, landscape
+</pre>
+
 h2. Using Rake
 
