@@ -66,36 +66,19 @@ module Webby
       :valid_uris => [],
 
       # Options for coderay processing
-      :coderay => {
-        :lang => :ruby,
-        :line_numbers => nil,
-        :line_number_start => 1,
-        :bold_every => 10,
-        :tab_width => 8
-      },
+      :coderay => {}, # deprecated, use helper_options['coderay']
 
       # Options for graphviz processing
-      :graphviz => {
-        :path => nil,
-        :cmd => 'dot',
-        :type => 'png'
-      },
+      :graphviz => {}, # deprecated, use helper_options['graphviz']
 
       # Options for tex2img processing
-      :tex2img => {
-        :path => nil,
-        :type => 'png',
-        :bg => 'white',
-        :fg => 'black',
-        :resolution => '150x150'
-      },
+      :tex2img => {}, # deprecated, use helper_options['tex2img']
 
       # Options for ultraviolet syntax highlighting
-      :uv => {
-        :lang => 'ruby',
-        :line_numbers => false,
-        :theme => 'mac_classic'
-      },
+      :uv => {}, # deprecated, use helper_options['uv']
+
+      # Global options for helper functions
+      :helper_options => {}, # defaults are set by the helper registration
 
       # XPath identifiers used by the basepath filter
       :xpaths => %w(

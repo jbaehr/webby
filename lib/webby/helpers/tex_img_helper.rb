@@ -36,6 +36,14 @@ module TexImgHelper
   #    :id       : HTML identifier
   #    :alt      : alternate text for the <img />
   #
+  # Site wide options can be given in the Sitefile. They will override the
+  # helper's defaults and can be overridden by the actual helper parameters.
+  #
+  #    SITE.helper_options[:tex2img] = {
+  #      :path => "images",
+  #      :resolution => "200x200"
+  #    } 
+  #
   def tex2img( *args, &block )
     opts = args.last.instance_of?(Hash) ? args.pop : {}
     name = args.first
@@ -44,12 +52,22 @@ module TexImgHelper
     text = capture_erb(&block)
     return if text.empty?
 
-    defaults = ::Webby.site.tex2img
-    path = opts.getopt(:path, defaults[:path])
-    type = opts.getopt(:type, defaults[:type])
-    bg   = opts.getopt(:bg, defaults[:bg])
-    fg   = opts.getopt(:fg, defaults[:fg])
-    res  = opts.getopt(:resolution, defaults[:resolution])
+    unless ::Webby.site.tex2img.empty?
+      Webby.deprecated "site.tex2img", "please use site.helper_options[:tex2img]"
+      defaults = ::Webby.site.tex2img
+      path = opts.getopt(:path, defaults[:path])
+      type = opts.getopt(:type, defaults[:type])
+      bg   = opts.getopt(:bg, defaults[:bg])
+      fg   = opts.getopt(:fg, defaults[:fg])
+      res  = opts.getopt(:resolution, defaults[:resolution])
+    else
+      opts = ::Webby::Helpers.options_for :tex2img, opts
+      path = opts[:path]
+      type = opts[:type]
+      bg = opts[:bg]
+      fg = opts[:fg]
+      res = opts[:resolution]
+    end
 
     # fix color escaping
     fg = fg =~ %r/^[a-zA-Z]+$/ ? fg : "\"#{fg}\""
@@ -125,7 +143,14 @@ end  # module TexImgHelper
 
 if  cmd_available?(%w[pdflatex --version]) \
 and cmd_available?(%w[convert --help])
-  register(TexImgHelper)
+  default_options = {
+    :path => nil,
+    :type => 'png',
+    :bg => 'white',
+    :fg => 'black',
+    :resolution => '150x150'
+    }
+  register(TexImgHelper, :tex2img => default_options)
 else
   register_dummy(TexImgHelper, "You need to install a TeX distribution and ImageMagick to use the tex2img")
 end

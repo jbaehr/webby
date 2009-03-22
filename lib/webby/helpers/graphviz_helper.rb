@@ -59,6 +59,13 @@ module GraphvizHelper
   #    :id       : HTML identifier
   #    :alt      : alternate text for the <img />
   #
+  # Site wide options can be given in the Sitefile. They will override the
+  # helper's defaults and can be overridden by the actual helper parameters.
+  #
+  #    SITE.helper_options[:graphviz] = {
+  #      :path => "images"
+  #    } 
+  #
   def graphviz( *args, &block )
     opts = args.last.instance_of?(Hash) ? args.pop : {}
 
@@ -70,10 +77,18 @@ module GraphvizHelper
     err = Tempfile.new('graphviz_err')
     err.close
 
-    defaults = ::Webby.site.graphviz
-    path = opts.getopt(:path, defaults[:path])
-    cmd  = opts.getopt(:cmd, defaults[:cmd])
-    type = opts.getopt(:type, defaults[:type])
+    unless ::Webby.site.graphviz.empty?
+      Webby.deprecated "site.graphviz", "please use site.helper_options[:graphviz]"
+      defaults = ::Webby.site.graphviz
+      path = opts.getopt(:path, defaults[:path])
+      cmd  = opts.getopt(:cmd, defaults[:cmd])
+      type = opts.getopt(:type, defaults[:type])
+    else
+      opts = ::Webby::Helpers.options_for :graphviz, opts
+      path = opts[:path]
+      cmd = opts[:cmd]
+      type = opts[:type]
+    end
 
     # pull the name of the graph|digraph out of the DOT script
     name = text.match(%r/\A\s*(?:strict\s+)?(?:di)?graph\s+([A-Za-z_][A-Za-z0-9_]*)\s+\{/o)[1]
@@ -128,7 +143,12 @@ module GraphvizHelper
 end  # module GraphvizHelper
 
 if cmd_available? %w[dot -V]
-  register(GraphvizHelper)
+  default_options = {
+    :path => nil,
+    :cmd => 'dot',
+    :type => 'png'
+    }
+  register(GraphvizHelper, :graphviz => default_options)
 else
   register_dummy(GraphvizHelper, "You need to install graphviz to use the graphviz helper")
 end

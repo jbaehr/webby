@@ -29,8 +29,12 @@ module UltraVioletHelper
   #    :theme          : see list of available themes in ultraviolet
   #                      [defaults to 'mac_classic']
   #
-  # The defaults can be overridden for an entire site by changing the SITE.uv
-  # options hash in the Rakefile.
+  # Site wide options can be given in the Sitefile. They will override the
+  # helper's defaults and can be overridden by the actual helper parameters.
+  #
+  #    SITE.helper_options[:uv] = {
+  #      :line_numbers => true
+  #    } 
   #
   def uv( *args, &block )
     opts = args.last.instance_of?(Hash) ? args.pop : {}
@@ -38,10 +42,18 @@ module UltraVioletHelper
     text = capture_erb(&block)
     return if text.empty?
     
-    defaults = ::Webby.site.uv
-    lang = opts.getopt(:lang, defaults[:lang])
-    line_numbers = opts.getopt(:line_numbers, defaults[:line_numbers])
-    theme = opts.getopt(:theme, defaults[:theme])
+    unless ::Webby.site.uv.empty?
+      Webby.deprecated "site.uv", "please use site.helper_options[:uv]"
+      defaults = ::Webby.site.uv
+      lang = opts.getopt(:lang, defaults[:lang])
+      line_numbers = opts.getopt(:line_numbers, defaults[:line_numbers])
+      theme = opts.getopt(:theme, defaults[:theme])
+    else
+      opts = ::Webby::Helpers.options_for :uv, opts
+      lang = opts[:lang]
+      line_numbers = opts[:line_numbers]
+      theme = opts[:theme]
+    end
     
     out = %Q{<div class="UltraViolet">\n}
     out << Uv.parse(text, "xhtml", lang, line_numbers, theme)
@@ -55,7 +67,12 @@ module UltraVioletHelper
   end
 end  # module UltraVioletHelper
 
-register(UltraVioletHelper)
+default_options = {
+  :lang => 'ruby',
+  :line_numbers => false,
+  :theme => 'mac_classic'
+  }
+register(UltraVioletHelper, :uv => default_options)
 
 end  # module Webby::Helpers
 else

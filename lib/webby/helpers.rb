@@ -14,12 +14,33 @@ module Webby
 module Helpers
 
   # call-seq:
-  #    Helpers.register( module )
+  #    Helpers.register( module, options = {} )
   #
   # Register the given _module_ as a helper module for the Webby framework.
+  # _options_ may be a hash of default options for the helper methods. These
+  # can be overridden by the Sitefile. To merge with the actual method parameters
+  # use the options_for method.
   #
-  def self.register( helper )
+  # The option hash need this form:
+  # {:helper_fuction1 => {...}, :helper_function2 => {...}}
+  #
+  def self.register( helper, options = {} )
+    @@default_options ||= Hash.new
+    @@default_options.merge!(options)
     ::Webby::Renderer.__send__( :include, helper )
+  end
+
+  # call-seq:
+  #   Helpers.options_for( :my_helper_function, options_from_parameters )
+  #
+  # If a helper functions has an option hash as parameter, it can use options_for
+  # for merge the actual optiosn with the default options (see Helpers.register) 
+  # and the site wide options.
+  #
+  def self.options_for(helper_function, helper_option_hash)
+    @@default_options[helper_function].
+      merge((Webby.site.helper_options[helper_function] or Hash.new)).
+      merge(helper_option_hash)
   end
 
   # call-seq:
