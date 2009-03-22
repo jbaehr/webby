@@ -64,6 +64,8 @@ end  # module CodeRayHelper
 register(CodeRayHelper)
 
 end  # module Webby::Helpers
+else
+  Webby::Helpers.register_dummy(:coderay, "You need to install the coderay gem to use the coderay helper")
 end  # try_require
 
 # EOF

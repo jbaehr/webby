@@ -126,6 +126,8 @@ end  # module TexImgHelper
 if  cmd_available?(%w[pdflatex --version]) \
 and cmd_available?(%w[convert --help])
   register(TexImgHelper)
+else
+  register_dummy(TexImgHelper, "You need to install a TeX distribution and ImageMagick to use the tex2img")
 end
 
 end  # module Webby::Helpers

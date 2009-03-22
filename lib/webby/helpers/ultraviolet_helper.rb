@@ -58,6 +58,8 @@ end  # module UltraVioletHelper
 register(UltraVioletHelper)
 
 end  # module Webby::Helpers
+else
+  Webby::Helpers.register_dummy(:uv, "You need to install the ultraviolet gem to use the uv helper")
 end  # try_require
 
 # EOF

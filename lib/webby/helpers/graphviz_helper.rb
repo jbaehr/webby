@@ -129,6 +129,8 @@ end  # module GraphvizHelper
 
 if cmd_available? %w[dot -V]
   register(GraphvizHelper)
+else
+  register_dummy(GraphvizHelper, "You need to install graphviz to use the graphviz helper")
 end
 
 end  # module Webby::Helpers

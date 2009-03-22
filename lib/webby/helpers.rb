@@ -22,6 +22,24 @@ module Helpers
     ::Webby::Renderer.__send__( :include, helper )
   end
 
+  # call-seq:
+  #   Helpers.register_dummy( :helper_function1, :helper_function2, ..., "error message" )
+  #   Helpers.register_dummy( HelperModule, "error message" )
+  #
+  # Register dummy helpers with a meaningful error message if the functions are not available
+  #
+  def self.register_dummy( *args )
+    message = args.pop
+    args = args.first.instance_methods if args.first.class == Module
+    args.each do |helper_function|
+      ::Webby::Renderer.class_eval <<-EVAL_END
+        def #{helper_function}(*dummy_args)
+          raise Webby::Error, "#{message}"
+        end
+      EVAL_END
+    end
+  end
+
 end  # module Helper
 end  # module Webby
 
