@@ -293,10 +293,12 @@ Include "textile" in the filter list of the page or layout that contains Textile
 <div class="desc">
 Per default the textile filter produces html (except when rtex appears later in the filter chain, then the output is latex) and uses the option no_span_caps. For use with the rtex filter it can also produce latex. Change it like this:
 
-<pre style="margin-bottom:0">
+<pre>
 filter:
   - textile: latex, span_caps
 </pre>
+
+Additionally this filter looks for "latex: true" it the pages meta data to toggle latex output. This can be overridden by the html option.
 </div>
 
 <div class="label">Require</div>
@@ -470,20 +472,20 @@ filter:    rtex
 \end{document}
 </pre>
 
-This can now be used to produce an pdf as well as html from a singe input page:
+This can now be used to produce an pdf as well as html from a singe input page. Note that some erb helpers as well as the textile filter are sensible to the page-wide latex option.
 
 <pre style="margin-bottom:0">
 <%= Webby::YAML_SEP %>
 title:      Some Article
 created_at: 2009-03-15 14:31:13.397515 +01:00
 filter:
+  - erb
   - textile
 <%= Webby::YAML_SEP %>
 layout: pdfarticle
-filter:
-  - textile: latex
+latex: true
 <%= Webby::YAML_SEP %>
-Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Nunc congue ipsum vestibulum libero. Aenean vitae justo. Nam eget tellus. Etiam convallis, est eu lobortis mattis, lectus tellus tempus felis, a ultricies erat ipsum at metus.
+Lorem ipsum dolor sit amet, consectetuer adipiscing elit...
 
 h2. Litora Sociis
 ...

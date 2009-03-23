@@ -161,7 +161,7 @@ h4. tex2img
 
 The tex2img method is used to convert a LaTeX script into an image and insert the image into the page. "LaTeX":http://www.latex-project.org/ and "ImageMagick":http://www.imagemagick.org/script/index.php need to be instaled on your system in order to use the tex2img maethod.
 
-The full list of "tex2img options":/rdoc/classes/Webby/Helpers/TexImgHelper.html can be found in the source documentation.
+The full list of "tex2img options":/rdoc/classes/Webby/Helpers/TexImgHelper.html can be found in the source documentation. If the page's meta data contains "latex: true", this filter becomes transparnt.
 
 <pre>
 <%% tex2img 'wave_eq', :path => 'images', :alt => 'wave equation' do -%>

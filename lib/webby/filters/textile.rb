@@ -7,6 +7,8 @@ if try_require('redcloth', 'RedCloth')
     # no_span_caps is the default, to stay backward compatible
     options << :no_span_caps unless cursor.current_options[:span_caps]
     options << :lite_mode if cursor.current_options[:lite_mode]
+    # if the page has "latex: true" in it's meta data, we render to latex
+    target = :latex if cursor.page.latex
     # if we will filter through rtex, use latex as default target
     target = :latex if cursor.remaining_filters.include? "rtex"
     # it's still possible to overwrite this setting by giving an explicit target

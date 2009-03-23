@@ -44,6 +44,8 @@ module TexImgHelper
   #      :resolution => "200x200"
   #    } 
   #
+  # If the page's meta data contains "latex: true", this filter becomes transparnt.
+  #
   def tex2img( *args, &block )
     opts = args.last.instance_of?(Hash) ? args.pop : {}
     name = args.first
@@ -51,6 +53,13 @@ module TexImgHelper
 
     text = capture_erb(&block)
     return if text.empty?
+
+    if @page.latex
+      # if we should prodruce latex output, we return the text as-is,
+      # protected from further textile filters
+      concat_erb(_guard(text), block.binding)
+      return
+    end
 
     unless ::Webby.site.tex2img.empty?
       Webby.deprecated "site.tex2img", "please use site.helper_options[:tex2img]"
