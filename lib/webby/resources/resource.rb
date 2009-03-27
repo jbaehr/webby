@@ -167,6 +167,13 @@ class Resource
     options
   end
 
+  # returns the target format of this resource as symbol.
+  # This is used by many filters/helpers which can output several formats, i.e. :html or :latex.
+  # It defaults to SITE.page_defaults['format'] if the current resource don't define a target format
+  def format
+    (_meta_data['format'] or Webby.site.page_defaults['format']).to_sym
+  end
+
   # The resource filename excluding path and extension. This will either be
   # the name of the file or the 'filename' attribute from the meta-data if
   # present.

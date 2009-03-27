@@ -298,7 +298,7 @@ filter:
   - textile: latex, span_caps
 </pre>
 
-Additionally this filter looks for "latex: true" it the pages meta data to toggle latex output. This can be overridden by the html option.
+Additionally this filter looks for "format: latex" it the pages meta data to toggle latex output. This can be overridden by the html option.
 </div>
 
 <div class="label">Require</div>
@@ -483,7 +483,7 @@ filter:
   - textile
 <%= Webby::YAML_SEP %>
 layout: pdfarticle
-latex: true
+format: latex
 <%= Webby::YAML_SEP %>
 Lorem ipsum dolor sit amet, consectetuer adipiscing elit...
 
