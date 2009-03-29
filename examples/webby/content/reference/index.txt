@@ -159,20 +159,58 @@ digraph hello_world {
 
 h4. tex2img
 
-The tex2img method is used to convert a LaTeX script into an image and insert the image into the page. "LaTeX":http://www.latex-project.org/ and "ImageMagick":http://www.imagemagick.org/script/index.php need to be instaled on your system in order to use the tex2img maethod.
+The tex2img method is used to convert a LaTeX script into an image and insert the image into the page. "LaTeX":http://www.latex-project.org/ and "ImageMagick":http://www.imagemagick.org/script/index.php need to be instaled on your system in order to use the tex2img method. Normally you use tex2img via one of it's frontend functions, latex_formula or tikz_picture.
 
 The full list of "tex2img options":/rdoc/classes/Webby/Helpers/TexImgHelper.html can be found in the source documentation. If the page's meta data contains "format: latex", this filter becomes transparnt.
 
 <pre>
-<%% tex2img 'wave_eq', :path => 'images', :alt => 'wave equation' do -%>
+<%% latex_formula 'wave_eq', :path => 'images', :alt => 'wave equation' do -%>
 $\psi_{tot}(x,-t_0,r) = \frac{1}{(2\pi)^2} \int\!\!\!\int
 \tilde\Psi_{tot}\left(k_x,\frac{c}{2}\sqrt{k_x^2 + k_r^2},r=0\right)$
 <%% end -%>
 </pre>
 
-<% tex2img 'wave_eq', :path => 'images', :alt => 'wave equation' do -%>
+<% latex_formula 'wave_eq', :path => 'images', :alt => 'wave equation' do -%>
 $\psi_{tot}(x,-t_0,r) = \frac{1}{(2\pi)^2} \int\!\!\!\int
 \tilde\Psi_{tot}\left(k_x,\frac{c}{2}\sqrt{k_x^2 + k_r^2},r=0\right)$
+<% end -%>
+
+<pre>
+<%% tikz_picture 'tikz_test', :path => 'images' do -%>
+\draw[fill=yellow] (0,0) -- (60:.75cm) arc (60:180:.75cm);
+\draw(120:0.4cm) node {$\alpha$};
+\draw[fill=green!30] (0,0) -- (right:.75cm) arc (0:60:.75cm);
+\draw(30:0.5cm) node {$\beta$};
+\begin{scope}[shift={(60:2cm)}]
+  \draw[fill=green!30] (0,0) -- (180:.75cm) arc (180:240:.75cm);
+  \draw (30:-0.5cm) node {$\gamma$};
+  \draw[fill=yellow] (0,0) -- (240:.75cm) arc (240:360:.75cm);
+  \draw (-60:0.4cm) node {$\delta$};
+\end{scope}
+\begin{scope}[thick]
+  \draw (60:-1cm) node[fill=white] {$E$} -- (60:3cm) node[fill=white] {$F$};
+  \draw[red] (-2,0) node[left] {$A$} -- (3,0) node[right]{$B$};
+  \draw[blue,shift={(60:2cm)}] (-3,0) node[left] {$C$} -- (2,0) node[right]{$D$};
+\end{scope}
+<%% end -%>
+</pre>
+
+<% tikz_picture 'tikz_test', :path => 'images' do -%>
+\draw[fill=yellow] (0,0) -- (60:.75cm) arc (60:180:.75cm);
+\draw(120:0.4cm) node {$\alpha$};
+\draw[fill=green!30] (0,0) -- (right:.75cm) arc (0:60:.75cm);
+\draw(30:0.5cm) node {$\beta$};
+\begin{scope}[shift={(60:2cm)}]
+  \draw[fill=green!30] (0,0) -- (180:.75cm) arc (180:240:.75cm);
+  \draw (30:-0.5cm) node {$\gamma$};
+  \draw[fill=yellow] (0,0) -- (240:.75cm) arc (240:360:.75cm);
+  \draw (-60:0.4cm) node {$\delta$};
+\end{scope}
+\begin{scope}[thick]
+  \draw (60:-1cm) node[fill=white] {$E$} -- (60:3cm) node[fill=white] {$F$};
+  \draw[red] (-2,0) node[left] {$A$} -- (3,0) node[right]{$B$};
+  \draw[blue,shift={(60:2cm)}] (-3,0) node[left] {$C$} -- (2,0) node[right]{$D$};
+\end{scope}
 <% end -%>
 
 
