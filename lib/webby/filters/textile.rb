@@ -21,6 +21,10 @@ if try_require('redcloth', 'RedCloth')
     end
   end
 
+  Webby::Filters.register_guard :textile do |input|
+    "<notextile>\n#{input}\n</notextile>"
+  end
+
 # Otherwise raise an error if the user tries to use textile
 else
   Webby::Filters.register :textile do |input|

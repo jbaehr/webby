@@ -16,6 +16,18 @@ module Filters
     def register( filter, options = {}, &block )
       _handlers[filter.to_s] = Handler.new(block, options)
     end
+
+    # Register a guard for a filter.
+    # +filter+ is the name of the filter.
+    # The block has to take one argument, the text to protect against the filter.
+    def register_guard( filter, &block )
+      _guards[filter.to_s] = block
+    end
+
+    # return the guard for a filter
+    def guard_for( filter )
+      _guards[filter.to_s]
+    end
     
     # Process input through filters
     def process( renderer, page, input )
@@ -31,6 +43,11 @@ module Filters
     # The registered filter handlers
     def _handlers
       @handlers ||= {}
+    end
+
+    # The registered filter guards
+    def _guards
+      @guards ||= {}
     end
 
     # Options for filters may be given in the following forms

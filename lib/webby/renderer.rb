@@ -370,8 +370,9 @@ class Renderer
   def _guard( str )
     return str unless @_cursor
 
-    if @_cursor.remaining_filters.include? 'textile'
-      str = "<notextile>\n%s\n</notextile>" % str
+    @_cursor.remaining_filters.reverse.each do |filter|
+      guard = Webby::Filters.guard_for(filter)
+      str = guard.call(str) if guard
     end
     str
   end

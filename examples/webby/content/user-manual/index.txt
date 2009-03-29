@@ -563,5 +563,15 @@ filter:
   - htmldoc: no_toc, landscape
 </pre>
 
+h4. Adding filter guards
+
+Sometimes one need to protect some text against a filter, like the result of a syntax highlight helper. Each filter which support this kind of exception should also register a filter guard to protect a text snippet against itself. The following example demonstrates this for the textile filter.
+
+<pre>
+Webby::Filters.register_guard :textile do |input|
+  "<notextile>\n#{input}\n</notextile>"
+end
+</pre>
+
 h2. Using Rake
 
